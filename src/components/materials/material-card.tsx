@@ -46,7 +46,7 @@ export default function MaterialCard({ material }: MaterialCardProps) {
         </Badge>
         <CardTitle className="font-headline text-xl">{material.name}</CardTitle>
         <CardDescription className="mt-2 text-lg font-semibold text-primary">
-          ${material.price.toFixed(2)}{' '}
+          ₹{material.price.toFixed(2)}{' '}
           <span className="text-sm font-normal text-muted-foreground">
             / {material.unit}
           </span>

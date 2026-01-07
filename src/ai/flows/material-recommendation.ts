@@ -15,7 +15,7 @@ import {z} from 'genkit';
 // Input schema for the material recommendation flow
 const MaterialRecommendationInputSchema = z.object({
   projectType: z.string().describe('The type of project (e.g., residential, commercial).'),
-  budget: z.number().describe('The budget for the project in USD.'),
+  budget: z.number().describe('The budget for the project in INR.'),
   location: z.string().describe('The location of the project.'),
   specificNeeds: z.string().describe('Any specific material needs or preferences.'),
 });
@@ -44,7 +44,7 @@ const materialRecommendationPrompt = ai.definePrompt({
   prompt: `You are an expert construction material advisor. Based on the project requirements below, recommend a list of materials that are suitable for the project.
 
 Project Type: {{{projectType}}}
-Budget: {{{budget}}} USD
+Budget: {{{budget}}} INR
 Location: {{{location}}}
 Specific Needs: {{{specificNeeds}}}
 

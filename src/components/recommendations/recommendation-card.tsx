@@ -19,7 +19,7 @@ export default function RecommendationCard({ recommendation }: RecommendationCar
                 </CardDescription>
             </div>
             <div className="text-right">
-                <p className="text-2xl font-bold text-primary">${recommendation.approximateCost.toLocaleString()}</p>
+                <p className="text-2xl font-bold text-primary">₹{recommendation.approximateCost.toLocaleString()}</p>
                 <p className="text-sm text-muted-foreground">Approx. Cost</p>
             </div>
         </div>

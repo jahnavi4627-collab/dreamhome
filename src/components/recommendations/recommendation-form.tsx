@@ -69,11 +69,11 @@ export default function RecommendationForm() {
                     )}
                     </div>
                     <div className="space-y-2">
-                    <Label htmlFor="budget">Budget (USD)</Label>
+                    <Label htmlFor="budget">Budget (INR)</Label>
                     <Input
                         id="budget"
                         type="number"
-                        placeholder="e.g., 50000"
+                        placeholder="e.g., 4000000"
                         {...form.register('budget')}
                     />
                     {form.formState.errors.budget && (
