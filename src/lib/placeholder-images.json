@@ -1,3 +1,52 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "hero-home",
+      "description": "A modern house exterior at dusk.",
+      "imageUrl": "https://images.unsplash.com/photo-1513584684374-8bab748fbf90?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8bW9kZXJuJTIwaG91c2V8ZW58MHx8fHwxNzY3NzMyNzE0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "modern house"
+    },
+    {
+      "id": "cement",
+      "description": "Bags of cement stacked on a pallet.",
+      "imageUrl": "https://images.unsplash.com/photo-1760131185787-597c462d6196?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8Y2VtZW50JTIwYmFnc3xlbnwwfHx8fDE3Njc3MzcyODB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "cement bags"
+    },
+    {
+      "id": "bricks",
+      "description": "A stack of red construction bricks.",
+      "imageUrl": "https://images.unsplash.com/photo-1612254284411-072ef43e0095?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxyZWQlMjBicmlja3N8ZW58MHx8fHwxNzY3NzY2OTg2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "red bricks"
+    },
+    {
+      "id": "steel-rebar",
+      "description": "A bundle of steel reinforcement bars.",
+      "imageUrl": "https://images.unsplash.com/photo-1654826710721-1204eda66762?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8c3RlZWwlMjByZWJhcnxlbnwwfHx8fDE3Njc3NjY5ODZ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "steel rebar"
+    },
+    {
+      "id": "tiles",
+      "description": "Ceramic floor tiles in a box.",
+      "imageUrl": "https://images.unsplash.com/photo-1458682625221-3a45f8a844c7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxjZXJhbWljJTIwdGlsZXN8ZW58MHx8fHwxNzY3NzY2OTg2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "ceramic tiles"
+    },
+    {
+      "id": "lumber",
+      "description": "Stacks of processed lumber.",
+      "imageUrl": "https://images.unsplash.com/photo-1649068946676-afea53a1d9a2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHx3b29kJTIwbHVtYmVyfGVufDB8fHx8MTc2NzcwNDQzNHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "wood lumber"
+    },
+    {
+      "id": "pvc-pipes",
+      "description": "White PVC pipes of various sizes.",
+      "imageUrl": "https://images.unsplash.com/photo-1737574990049-264694ce17a0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxwdmMlMjBwaXBlc3xlbnwwfHx8fDE3Njc3MjY0MTl8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "pvc pipes"
+    },
+    {
+      "id": "recommendation-bg",
+      "description": "An architect looking at blueprints.",
+      "imageUrl": "https://images.unsplash.com/photo-1746899603348-ab9afd71e16d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxhcmNoaXRlY3QlMjBibHVlcHJpbnR8ZW58MHx8fHwxNzY3NzY2OTg2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "architect blueprint"
+    }
+  ]
 }
