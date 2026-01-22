@@ -1,4 +1,4 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { MaterialRecommendationOutput } from '@/ai/flows/material-recommendation';
 
 type Recommendation = MaterialRecommendationOutput['recommendations'][0];
@@ -14,9 +14,6 @@ export default function RecommendationCard({ recommendation }: RecommendationCar
         <div className="flex justify-between items-start">
             <div>
                 <CardTitle className="font-headline text-2xl">{recommendation.materialName}</CardTitle>
-                <CardDescription className="text-sm">
-                Supplied by: <span className="font-semibold text-primary">{recommendation.supplier}</span>
-                </CardDescription>
             </div>
             <div className="text-right">
                 <p className="text-2xl font-bold text-primary">₹{recommendation.approximateCost.toLocaleString()}</p>

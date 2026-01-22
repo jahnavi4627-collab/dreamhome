@@ -27,7 +27,6 @@ const MaterialRecommendationOutputSchema = z.object({
     z.object({
       materialName: z.string().describe('The name of the recommended material.'),
       description: z.string().describe('A description of the material and its suitability for the project.'),
-      supplier: z.string().describe('The supplier of the recommended material.'),
       approximateCost: z.number().describe('The approximate cost of the material.'),
     })
   ).describe('A list of recommended materials.'),
@@ -48,7 +47,7 @@ Budget: {{{budget}}} INR
 Location: {{{location}}}
 Specific Needs: {{{specificNeeds}}}
 
-Provide a list of materials with their name, description, supplier, and approximate cost. Focus on materials that fit within the specified budget and are available in the given location.`,
+Provide a list of materials with their name, description, and approximate cost. Focus on materials that fit within the specified budget and are available in the given location.`,
 });
 
 // Define the Genkit flow
