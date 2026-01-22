@@ -178,6 +178,7 @@ export default function SignupPage() {
                 <SelectContent>
                   <SelectItem value="builder">Builder</SelectItem>
                   <SelectItem value="contractor">Contractor</SelectItem>
+                  <SelectItem value="supplier">Supplier</SelectItem>
                 </SelectContent>
               </Select>
             </div>
