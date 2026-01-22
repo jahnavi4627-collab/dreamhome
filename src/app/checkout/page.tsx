@@ -92,15 +92,18 @@ export default function CheckoutPage() {
 
             const itemsCollectionRef = collection(orderRef, 'orderItems');
             items.forEach(item => {
+                const orderItemRef = doc(itemsCollectionRef);
                 const orderItemData = {
+                    id: orderItemRef.id,
+                    orderId: orderRef.id,
                     materialId: item.id,
                     name: item.name,
                     quantity: item.quantity,
                     price: item.price,
                     imageUrlId: item.imageUrlId,
                 };
-                addDoc(itemsCollectionRef, orderItemData)
-                    .catch(err => errorEmitter.emit('permission-error', new FirestorePermissionError({ path: itemsCollectionRef.path, operation: 'create', requestResourceData: orderItemData })));
+                setDoc(orderItemRef, orderItemData)
+                    .catch(err => errorEmitter.emit('permission-error', new FirestorePermissionError({ path: orderItemRef.path, operation: 'create', requestResourceData: orderItemData })));
             });
         });
 

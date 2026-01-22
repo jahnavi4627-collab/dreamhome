@@ -33,6 +33,7 @@ export interface Order {
 
 export interface OrderItem {
   id: string;
+  orderId: string;
   materialId: string;
   name: string;
   quantity: number;
