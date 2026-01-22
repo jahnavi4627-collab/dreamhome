@@ -54,8 +54,7 @@ export default function MaterialCard({ material }: MaterialCardProps) {
       </CardContent>
       <CardFooter className="p-4 pt-0">
         <Button asChild className="w-full">
-          {/* Link will eventually go to /materials/[id] */}
-          <Link href="#">View Details</Link>
+          <Link href={`/materials/${material.id}`}>View Details</Link>
         </Button>
       </CardFooter>
     </Card>
