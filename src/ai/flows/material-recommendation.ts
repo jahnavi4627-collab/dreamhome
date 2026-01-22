@@ -10,7 +10,7 @@
  */
 
 import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
+import {z} from 'zod';
 
 // Input schema for the material recommendation flow
 const MaterialRecommendationInputSchema = z.object({
@@ -39,6 +39,7 @@ export type MaterialRecommendationOutput = z.infer<typeof MaterialRecommendation
 // Define the Genkit prompt
 const materialRecommendationPrompt = ai.definePrompt({
   name: 'materialRecommendationPrompt',
+  model: 'googleai/gemini-2.5-flash',
   input: {schema: MaterialRecommendationInputSchema},
   output: {schema: MaterialRecommendationOutputSchema},
   prompt: `You are an expert construction material advisor. Based on the project requirements below, recommend a list of materials that are suitable for the project.
