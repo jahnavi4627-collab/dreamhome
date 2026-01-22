@@ -1,3 +1,5 @@
+'use client';
+
 import Image from 'next/image';
 import { materials, suppliers } from '@/lib/mock-data';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
@@ -7,8 +9,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
 import { notFound } from 'next/navigation';
 import { ShoppingCart } from 'lucide-react';
+import { useCart } from '@/context/cart-context';
 
 export default function MaterialDetailPage({ params }: { params: { id: string } }) {
+  const { addToCart } = useCart();
   const material = materials.find((m) => m.id === params.id);
 
   if (!material) {
@@ -17,6 +21,12 @@ export default function MaterialDetailPage({ params }: { params: { id: string } 
 
   const supplier = suppliers.find((s) => s.id === material.supplierId);
   const image = PlaceHolderImages.find((img) => img.id === material.imageUrlId);
+
+  const handleAddToCart = () => {
+    if (material) {
+      addToCart(material);
+    }
+  };
 
   return (
     <div className="container mx-auto px-4 py-12">
@@ -58,7 +68,7 @@ export default function MaterialDetailPage({ params }: { params: { id: string } 
           )}
 
           <div className="mt-8">
-            <Button size="lg">
+            <Button size="lg" onClick={handleAddToCart}>
               <ShoppingCart className="mr-2" />
               Add to Cart
             </Button>

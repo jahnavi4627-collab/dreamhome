@@ -13,6 +13,8 @@ import {
 } from '@/components/ui/sheet';
 import Logo from '@/components/logo';
 import { cn } from '@/lib/utils';
+import { useCart } from '@/context/cart-context';
+import { Badge } from '@/components/ui/badge';
 
 const navLinks = [
   { href: '/', label: 'Home' },
@@ -23,6 +25,9 @@ const navLinks = [
 
 export default function Header() {
   const pathname = usePathname();
+  const { cartItems } = useCart();
+
+  const totalItems = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -97,8 +102,11 @@ export default function Header() {
         
         <div className="flex flex-1 items-center justify-end space-x-2">
           <Button variant="ghost" size="icon" asChild>
-             <Link href="/cart">
+             <Link href="/cart" className="relative">
                 <ShoppingCart className="h-5 w-5" />
+                {totalItems > 0 && (
+                  <Badge className="absolute -top-2 -right-2 h-5 w-5 justify-center p-0">{totalItems}</Badge>
+                )}
                 <span className="sr-only">Shopping Cart</span>
               </Link>
           </Button>

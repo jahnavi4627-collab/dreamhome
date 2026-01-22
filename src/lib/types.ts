@@ -16,3 +16,7 @@ export interface Supplier {
   location: string;
   rating: number;
 }
+
+export interface CartItem extends Material {
+  quantity: number;
+}
