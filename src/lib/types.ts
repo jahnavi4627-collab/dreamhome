@@ -20,3 +20,22 @@ export interface Supplier {
 export interface CartItem extends Material {
   quantity: number;
 }
+
+export interface Order {
+  id: string;
+  userId: string;
+  supplierId: string;
+  orderDate: any; // Firebase Timestamp
+  status: 'pending' | 'shipped' | 'delivered' | 'cancelled';
+  totalAmount: number;
+  shippingAddress: string;
+}
+
+export interface OrderItem {
+  id: string;
+  materialId: string;
+  name: string;
+  quantity: number;
+  price: number;
+  imageUrlId: string;
+}

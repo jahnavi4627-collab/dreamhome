@@ -18,12 +18,18 @@ import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
+import { useUser, useFirestore, errorEmitter } from '@/firebase';
+import { collection, doc, serverTimestamp, setDoc, addDoc } from 'firebase/firestore';
+import type { CartItem } from '@/lib/types';
+import { FirestorePermissionError } from '@/firebase/errors';
 
 export default function CheckoutPage() {
   const { cartItems, clearCart } = useCart();
   const { toast } = useToast();
   const router = useRouter();
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
+  const { user } = useUser();
+  const firestore = useFirestore();
 
   const subtotal = cartItems.reduce(
     (acc, item) => acc + item.price * item.quantity,
@@ -33,17 +39,78 @@ export default function CheckoutPage() {
   const total = subtotal + taxes;
 
   const handlePlaceOrder = () => {
-    setIsPlacingOrder(true);
-    // Simulate API call
-    setTimeout(() => {
+    if (!user) {
       toast({
-        title: 'Order Placed!',
-        description:
-          'Thank you for your purchase. Your materials are on the way.',
+        title: 'Authentication required',
+        description: 'You must be logged in to place an order.',
+        variant: 'destructive',
       });
-      clearCart();
-      router.push('/orders');
-      setIsPlacingOrder(false);
+      router.push('/login');
+      return;
+    }
+    if (isPlacingOrder) return;
+
+    setIsPlacingOrder(true);
+
+    // Simulate API call and processing time
+    setTimeout(() => {
+        const shippingAddress = '123 Construction Ave, Buildville, CA 90210'; // Placeholder from form
+
+        const itemsBySupplier = cartItems.reduce((acc, item) => {
+          const supplierId = item.supplierId;
+          if (!acc[supplierId]) {
+            acc[supplierId] = [];
+          }
+          acc[supplierId].push(item);
+          return acc;
+        }, {} as Record<string, CartItem[]>);
+
+        const supplierIds = Object.keys(itemsBySupplier);
+        if (supplierIds.length === 0) {
+            setIsPlacingOrder(false);
+            return;
+        }
+
+        supplierIds.forEach(supplierId => {
+            const items = itemsBySupplier[supplierId];
+            const totalAmount = items.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+
+            const orderRef = doc(collection(firestore, 'users', user.uid, 'orders'));
+            
+            const orderData = {
+                id: orderRef.id,
+                userId: user.uid,
+                supplierId,
+                orderDate: serverTimestamp(),
+                status: 'pending',
+                totalAmount: totalAmount * 1.1, // with tax
+                shippingAddress,
+            };
+
+            setDoc(orderRef, orderData)
+              .catch(err => errorEmitter.emit('permission-error', new FirestorePermissionError({ path: orderRef.path, operation: 'create', requestResourceData: orderData })));
+
+            const itemsCollectionRef = collection(orderRef, 'orderItems');
+            items.forEach(item => {
+                const orderItemData = {
+                    materialId: item.id,
+                    name: item.name,
+                    quantity: item.quantity,
+                    price: item.price,
+                    imageUrlId: item.imageUrlId,
+                };
+                addDoc(itemsCollectionRef, orderItemData)
+                    .catch(err => errorEmitter.emit('permission-error', new FirestorePermissionError({ path: itemsCollectionRef.path, operation: 'create', requestResourceData: orderItemData })));
+            });
+        });
+
+        toast({
+            title: 'Order Placed!',
+            description: 'Thank you for your purchase. Your materials are on the way.',
+        });
+        clearCart();
+        router.push('/orders');
+        setIsPlacingOrder(false);
     }, 1500);
   };
 
