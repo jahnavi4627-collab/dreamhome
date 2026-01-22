@@ -5,10 +5,7 @@ import { z } from 'zod';
 
 const FormSchema = z.object({
   projectType: z.string().min(1, 'Project type is required.'),
-  budget: z.preprocess(
-    (a) => parseFloat(z.string().parse(a)),
-    z.number().positive('Budget must be a positive number.')
-  ),
+  budget: z.coerce.number().positive('Budget must be a positive number.'),
   location: z.string().min(1, 'Location is required.'),
   specificNeeds: z.string().min(1, 'Please describe your specific needs.'),
 });
@@ -16,6 +13,12 @@ const FormSchema = z.object({
 export type State = {
   message?: string | null;
   recommendations?: MaterialRecommendationOutput['recommendations'] | null;
+  errors?: {
+    projectType?: string[];
+    budget?: string[];
+    location?: string[];
+    specificNeeds?: string[];
+  };
   success: boolean;
 };
 
@@ -33,6 +36,7 @@ export async function getRecommendations(
   if (!validatedFields.success) {
     return {
       message: 'Invalid form data. Please check your inputs.',
+      errors: validatedFields.error.flatten().fieldErrors,
       success: false,
     };
   }

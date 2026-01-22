@@ -2,9 +2,6 @@
 
 import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { Loader2 } from 'lucide-react';
 
 import { getRecommendations, State } from '@/app/recommendations/actions';
@@ -15,15 +12,6 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import RecommendationCard from './recommendation-card';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
-
-const FormSchema = z.object({
-  projectType: z.string().min(1, 'Project type is required.'),
-  budget: z.string().min(1, 'Budget is required.'),
-  location: z.string().min(1, 'Location is required.'),
-  specificNeeds: z.string().min(1, 'Please describe your specific needs.'),
-});
-
-type FormData = z.infer<typeof FormSchema>;
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -39,16 +27,6 @@ export default function RecommendationForm() {
   const initialState: State = { message: null, recommendations: null, success: false };
   const [state, dispatch] = useActionState(getRecommendations, initialState);
 
-  const form = useForm<FormData>({
-    resolver: zodResolver(FormSchema),
-    defaultValues: {
-      projectType: '',
-      budget: '',
-      location: '',
-      specificNeeds: '',
-    },
-  });
-
   return (
     <div>
         <Card className="max-w-2xl mx-auto bg-background/90 backdrop-blur-sm">
@@ -62,23 +40,23 @@ export default function RecommendationForm() {
                     <Label htmlFor="projectType">Project Type</Label>
                     <Input
                         id="projectType"
+                        name="projectType"
                         placeholder="e.g., Residential, Commercial"
-                        {...form.register('projectType')}
                     />
-                    {form.formState.errors.projectType && (
-                        <p className="text-sm text-destructive">{form.formState.errors.projectType.message}</p>
+                    {state.errors?.projectType && (
+                        <p className="text-sm text-destructive">{state.errors.projectType[0]}</p>
                     )}
                     </div>
                     <div className="space-y-2">
                     <Label htmlFor="budget">Budget (INR)</Label>
                     <Input
                         id="budget"
+                        name="budget"
                         type="number"
                         placeholder="e.g., 4000000"
-                        {...form.register('budget')}
                     />
-                    {form.formState.errors.budget && (
-                        <p className="text-sm text-destructive">{form.formState.errors.budget.message}</p>
+                    {state.errors?.budget && (
+                        <p className="text-sm text-destructive">{state.errors.budget[0]}</p>
                     )}
                     </div>
                 </div>
@@ -86,22 +64,22 @@ export default function RecommendationForm() {
                 <Label htmlFor="location">Location</Label>
                 <Input
                     id="location"
+                    name="location"
                     placeholder="e.g., San Francisco, CA"
-                    {...form.register('location')}
                 />
-                {form.formState.errors.location && (
-                    <p className="text-sm text-destructive">{form.formState.errors.location.message}</p>
+                {state.errors?.location && (
+                    <p className="text-sm text-destructive">{state.errors.location[0]}</p>
                 )}
                 </div>
                 <div className="space-y-2">
                 <Label htmlFor="specificNeeds">Specific Needs</Label>
                 <Textarea
                     id="specificNeeds"
+                    name="specificNeeds"
                     placeholder="e.g., Eco-friendly materials, high-durability for coastal area"
-                    {...form.register('specificNeeds')}
                 />
-                {form.formState.errors.specificNeeds && (
-                    <p className="text-sm text-destructive">{form.formState.errors.specificNeeds.message}</p>
+                {state.errors?.specificNeeds && (
+                    <p className="text-sm text-destructive">{state.errors.specificNeeds[0]}</p>
                 )}
                 </div>
             </CardContent>
