@@ -3,14 +3,9 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import {
-  useAuth,
-  useUser,
-  useFirestore,
-  setDocumentNonBlocking,
-} from '@/firebase';
+import { useAuth, useUser, useFirestore } from '@/firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { doc } from 'firebase/firestore';
+import { doc, setDoc } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -75,7 +70,7 @@ export default function SignupPage() {
       };
 
       const userDocRef = doc(firestore, 'users', newUser.uid);
-      setDocumentNonBlocking(userDocRef, userProfile, { merge: true });
+      await setDoc(userDocRef, userProfile, { merge: true });
 
       toast({
         title: 'Signup successful!',
