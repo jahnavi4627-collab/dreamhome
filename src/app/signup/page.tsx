@@ -83,9 +83,25 @@ export default function SignupPage() {
       });
       router.push('/dashboard');
     } catch (error: any) {
+      let description = 'An unknown error occurred.';
+      switch (error.code) {
+        case 'auth/invalid-email':
+          description = 'Please enter a valid email address.';
+          break;
+        case 'auth/email-already-in-use':
+          description = 'This email address is already in use.';
+          break;
+        case 'auth/weak-password':
+          description =
+            'The password is too weak. It must be at least 6 characters long.';
+          break;
+        default:
+          description = error.message;
+          break;
+      }
       toast({
         title: 'Signup failed',
-        description: error.message || 'An unknown error occurred.',
+        description,
         variant: 'destructive',
       });
     }
