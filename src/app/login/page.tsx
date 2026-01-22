@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useAuth, useUser, initiateEmailSignIn } from '@/firebase';
+import { useAuth, useUser } from '@/firebase';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -15,7 +16,6 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { onAuthStateChanged } from 'firebase/auth';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -30,24 +30,8 @@ export default function LoginPage() {
       router.push('/dashboard');
     }
   }, [user, router]);
-  
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-        if(user) {
-            router.push('/dashboard');
-        }
-    }, (error) => {
-         toast({
-            title: 'Login failed',
-            description: error.message || 'An unknown error occurred.',
-            variant: 'destructive',
-        });
-    });
 
-    return () => unsubscribe();
-  }, [auth, router, toast]);
-
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
       toast({
@@ -57,7 +41,25 @@ export default function LoginPage() {
       });
       return;
     }
-    initiateEmailSignIn(auth, email, password);
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      toast({
+        title: 'Login Successful!',
+        description: "You're now logged in.",
+      });
+    } catch (error: any) {
+      let description = 'An unknown error occurred.';
+      if (error.code === 'auth/invalid-credential') {
+        description = 'Invalid email or password. Please try again.';
+      } else {
+        description = error.message;
+      }
+      toast({
+        title: 'Login failed',
+        description,
+        variant: 'destructive',
+      });
+    }
   };
 
   if (isUserLoading || user) {
