@@ -1,10 +1,20 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { Menu, ShoppingCart, User } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+import { Menu, ShoppingCart, User as UserIcon, LogOut } from 'lucide-react';
+import { useAuth, useUser } from '@/firebase';
+import { signOut } from 'firebase/auth';
 
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {
   Sheet,
   SheetContent,
@@ -15,6 +25,8 @@ import Logo from '@/components/logo';
 import { cn } from '@/lib/utils';
 import { useCart } from '@/context/cart-context';
 import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useToast } from '@/hooks/use-toast';
 
 const navLinks = [
   { href: '/', label: 'Home' },
@@ -25,9 +37,35 @@ const navLinks = [
 
 export default function Header() {
   const pathname = usePathname();
+  const router = useRouter();
   const { cartItems } = useCart();
+  const { user, isUserLoading } = useUser();
+  const auth = useAuth();
+  const { toast } = useToast();
 
   const totalItems = cartItems.reduce((acc, item) => acc + item.quantity, 0);
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      toast({
+        title: 'Logged out',
+        description: 'You have been successfully logged out.',
+      });
+      router.push('/');
+    } catch (error) {
+      toast({
+        title: 'Logout failed',
+        description: 'An error occurred during logout.',
+        variant: 'destructive',
+      });
+    }
+  };
+  
+  const getInitials = (name: string | null | undefined) => {
+    if (!name) return 'U';
+    return name.split(' ').map(n => n[0]).join('');
+  }
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -54,6 +92,14 @@ export default function Header() {
                 {link.label}
               </Link>
             ))}
+            {user && (
+                <Link href="/dashboard" className={cn(
+                  'transition-colors hover:text-primary',
+                  pathname === '/dashboard'
+                    ? 'text-primary'
+                    : 'text-muted-foreground'
+                )}>Dashboard</Link>
+            )}
           </nav>
         </div>
 
@@ -95,6 +141,16 @@ export default function Header() {
                     </Link>
                   </SheetClose>
                 ))}
+                 {user && (
+                  <SheetClose asChild>
+                    <Link href="/dashboard" className={cn(
+                      'text-lg font-medium transition-colors hover:text-primary',
+                      pathname === '/dashboard'
+                        ? 'text-primary'
+                        : 'text-muted-foreground'
+                    )}>Dashboard</Link>
+                  </SheetClose>
+                )}
               </div>
             </nav>
           </SheetContent>
@@ -110,12 +166,43 @@ export default function Header() {
                 <span className="sr-only">Shopping Cart</span>
               </Link>
           </Button>
-          <Button variant="outline" asChild>
-            <Link href="/login">
-              <User className="mr-2 h-4 w-4" />
-              Login
-            </Link>
-          </Button>
+
+          {isUserLoading ? (
+            <div className="h-8 w-24 animate-pulse rounded-md bg-muted" />
+          ) : user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={user.photoURL || ''} alt={user.displayName || 'User'} />
+                    <AvatarFallback>{getInitials(user.displayName || user.email)}</AvatarFallback>
+                  </Avatar>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56" align="end" forceMount>
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">{user.displayName || 'User'}</p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                      {user.email}
+                    </p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Log out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Button variant="outline" asChild>
+              <Link href="/login">
+                <UserIcon className="mr-2 h-4 w-4" />
+                Login
+              </Link>
+            </Button>
+          )}
         </div>
       </div>
     </header>
