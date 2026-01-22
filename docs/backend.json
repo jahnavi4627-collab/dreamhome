@@ -1,0 +1,374 @@
+{
+  "entities": {
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents a user of the Dream Home application.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the user."
+        },
+        "email": {
+          "type": "string",
+          "description": "User's email address.",
+          "format": "email"
+        },
+        "firstName": {
+          "type": "string",
+          "description": "User's first name."
+        },
+        "lastName": {
+          "type": "string",
+          "description": "User's last name."
+        },
+        "phone": {
+          "type": "string",
+          "description": "User's phone number."
+        },
+        "address": {
+          "type": "string",
+          "description": "User's address."
+        },
+        "userType": {
+          "type": "string",
+          "description": "Type of user (e.g., 'builder', 'contractor')."
+        }
+      },
+      "required": [
+        "id",
+        "email",
+        "firstName",
+        "lastName",
+        "userType"
+      ]
+    },
+    "Supplier": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Supplier",
+      "type": "object",
+      "description": "Represents a supplier of construction materials.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the supplier."
+        },
+        "companyName": {
+          "type": "string",
+          "description": "Name of the supplier company."
+        },
+        "email": {
+          "type": "string",
+          "description": "Supplier's email address.",
+          "format": "email"
+        },
+        "phone": {
+          "type": "string",
+          "description": "Supplier's phone number."
+        },
+        "address": {
+          "type": "string",
+          "description": "Supplier's address."
+        },
+        "contactPerson": {
+          "type": "string",
+          "description": "Contact person for the supplier."
+        }
+      },
+      "required": [
+        "id",
+        "companyName",
+        "email",
+        "contactPerson"
+      ]
+    },
+    "Material": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Material",
+      "type": "object",
+      "description": "Represents a construction material offered by a supplier.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the material."
+        },
+        "supplierId": {
+          "type": "string",
+          "description": "Reference to Supplier. (Relationship: Supplier 1:N Material)"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the material."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the material."
+        },
+        "category": {
+          "type": "string",
+          "description": "Category of the material (e.g., 'wood', 'concrete')."
+        },
+        "price": {
+          "type": "number",
+          "description": "Price of the material."
+        },
+        "unit": {
+          "type": "string",
+          "description": "Unit of measurement (e.g., 'piece', 'cubic meter')."
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "URL of the material's image.",
+          "format": "uri"
+        },
+        "availability": {
+          "type": "boolean",
+          "description": "Indicates if the material is currently available."
+        }
+      },
+      "required": [
+        "id",
+        "supplierId",
+        "name",
+        "category",
+        "price",
+        "unit",
+        "imageUrl",
+        "availability"
+      ]
+    },
+    "Order": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Order",
+      "type": "object",
+      "description": "Represents an order placed by a user.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the order."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N Order)"
+        },
+        "supplierId": {
+          "type": "string",
+          "description": "Reference to Supplier. (Relationship: Supplier 1:N Order)"
+        },
+        "orderDate": {
+          "type": "string",
+          "description": "Date the order was placed.",
+          "format": "date-time"
+        },
+        "status": {
+          "type": "string",
+          "description": "Current status of the order (e.g., 'pending', 'shipped', 'delivered')."
+        },
+        "totalAmount": {
+          "type": "number",
+          "description": "Total amount of the order."
+        },
+        "shippingAddress": {
+          "type": "string",
+          "description": "Shipping address for the order."
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "supplierId",
+        "orderDate",
+        "status",
+        "totalAmount",
+        "shippingAddress"
+      ]
+    },
+    "OrderItem": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "OrderItem",
+      "type": "object",
+      "description": "Represents a specific item within an order.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the order item."
+        },
+        "orderId": {
+          "type": "string",
+          "description": "Reference to Order. (Relationship: Order 1:N OrderItem)"
+        },
+        "materialId": {
+          "type": "string",
+          "description": "Reference to Material. (Relationship: Material 1:N OrderItem)"
+        },
+        "quantity": {
+          "type": "number",
+          "description": "Quantity of the material ordered."
+        },
+        "price": {
+          "type": "number",
+          "description": "Price of the material at the time of order."
+        }
+      },
+      "required": [
+        "id",
+        "orderId",
+        "materialId",
+        "quantity",
+        "price"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores user profile data. Path-based ownership ensures only the user can access their data.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/suppliers/{supplierId}",
+        "definition": {
+          "entityName": "Supplier",
+          "schema": {
+            "$ref": "#/backend/entities/Supplier"
+          },
+          "description": "Stores supplier profile data. Path-based ownership ensures only the supplier can access their data.",
+          "params": [
+            {
+              "name": "supplierId",
+              "description": "The unique identifier of the supplier."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/suppliers/{supplierId}/materials/{materialId}",
+        "definition": {
+          "entityName": "Material",
+          "schema": {
+            "$ref": "#/backend/entities/Material"
+          },
+          "description": "Stores materials offered by a supplier. Path-based ownership via supplierId.",
+          "params": [
+            {
+              "name": "supplierId",
+              "description": "The unique identifier of the supplier."
+            },
+            {
+              "name": "materialId",
+              "description": "The unique identifier of the material."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/orders/{orderId}",
+        "definition": {
+          "entityName": "Order",
+          "schema": {
+            "$ref": "#/backend/entities/Order"
+          },
+          "description": "Stores order data for a user. Denormalizes 'supplierId' for authorization independence.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user."
+            },
+            {
+              "name": "orderId",
+              "description": "The unique identifier of the order."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/suppliers/{supplierId}/orders/{orderId}",
+        "definition": {
+          "entityName": "Order",
+          "schema": {
+            "$ref": "#/backend/entities/Order"
+          },
+          "description": "Stores order data for a supplier. Denormalizes 'userId' for authorization independence.",
+          "params": [
+            {
+              "name": "supplierId",
+              "description": "The unique identifier of the supplier."
+            },
+            {
+              "name": "orderId",
+              "description": "The unique identifier of the order."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/orders/{orderId}/orderItems/{orderItemId}",
+        "definition": {
+          "entityName": "OrderItem",
+          "schema": {
+            "$ref": "#/backend/entities/OrderItem"
+          },
+          "description": "Stores order items for a specific order of a user. Inherits authorization context from the parent order.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user."
+            },
+            {
+              "name": "orderId",
+              "description": "The unique identifier of the order."
+            },
+            {
+              "name": "orderItemId",
+              "description": "The unique identifier of the order item."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/suppliers/{supplierId}/orders/{orderId}/orderItems/{orderItemId}",
+        "definition": {
+          "entityName": "OrderItem",
+          "schema": {
+            "$ref": "#/backend/entities/OrderItem"
+          },
+          "description": "Stores order items for a specific order of a supplier. Inherits authorization context from the parent order.",
+          "params": [
+            {
+              "name": "supplierId",
+              "description": "The unique identifier of the supplier."
+            },
+            {
+              "name": "orderId",
+              "description": "The unique identifier of the order."
+            },
+            {
+              "name": "orderItemId",
+              "description": "The unique identifier of the order item."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure is designed to provide a secure, scalable, and easily maintainable data model for the \"Dream Home\" application, focusing on authorization independence and clear access patterns.\n\n1.  **Users:** User data is stored in `/users/{userId}`. This path-based ownership is a standard and secure way to manage private user data.\n\n2.  **Suppliers:** Supplier data is stored in `/suppliers/{supplierId}`. This is similar to users and provides a dedicated space for supplier information.\n\n3.  **Materials:** Materials are stored under the corresponding supplier in `/suppliers/{supplierId}/materials/{materialId}`. This reflects the supplier 1:N material relationship. Access to materials will be controlled at the supplier level.\n\n4.  **Orders:** Orders are stored under the corresponding user in `/users/{userId}/orders/{orderId}`. Each order also denormalizes the supplierId for efficient querying and to avoid joins in the security rules. Additionally, the shippingAddress is stored here so that only the authenticated user can access this information. A separate collection `/suppliers/{supplierId}/orders/{orderId}` allows suppliers to manage orders. Both collections contain a reference to the same order document, ensuring data consistency. The `supplierId` is denormalized in `/users/{userId}/orders/{orderId}` and `userId` is denormalized in `/suppliers/{supplierId}/orders/{orderId}` to achieve authorization independence.  Order documents include `userId` and `supplierId` which are used in security rules. Order status changes are handled via server-side functions to ensure data integrity and consistent state transitions.\n\n5.  **Order Items:** Order items are stored under the corresponding order in `/users/{userId}/orders/{orderId}/orderItems/{orderItemId}` and `/suppliers/{supplierId}/orders/{orderId}/orderItems/{orderItemId}`. This nested structure maintains the order 1:N orderItem relationship. It also inherits authorization context from the parent order. Since orders exists in two different root locations, orderItems will exist in the same mirrored structure for both users and suppliers. \n\n**Authorization Independence:** Authorization independence is achieved by using path-based ownership for user-specific data (users, orders) and embedding relevant authorization context (supplierId, userId) into documents. This avoids the need for `get()` calls in security rules, which improves performance and simplifies security rule management.\n\n**QAPs Support:**\n*   Secure `list` operations are supported by structural segregation. Listing materials is done under `/suppliers/{supplierId}/materials`, ensuring only materials belonging to a specific supplier are listed.\n*   User-specific data like orders are stored under `/users/{userId}/orders`, enabling secure listing of orders for a specific user."
+  }
+}

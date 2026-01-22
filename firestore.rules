@@ -1,0 +1,236 @@
+/**
+ * This ruleset enforces a strict ownership-based security model for the Dream Home application.
+ *
+ * Core Philosophy:
+ * The security model is built on strict segregation of data between 'users' and 'suppliers'.
+ * Each party can only access data within their own dedicated data tree (e.g., /users/{userId}/* or /suppliers/{supplierId}/*).
+ * This path-based ownership ensures that users cannot access other users' data, and suppliers cannot access other suppliers' data.
+ *
+ * Data Structure:
+ * The data is organized hierarchically. User profiles and their associated orders are stored under '/users/{userId}'.
+ * Supplier profiles, their materials, and their view of orders are stored under '/suppliers/{supplierId}'.
+ * Orders are duplicated under both the user's and the supplier's paths to provide independent, secure access for each party involved in a transaction.
+ *
+ * Key Security Decisions:
+ * - No Public Listings: Listing of top-level user or supplier documents is disabled to protect user privacy.
+ * - Publicly Readable Materials: Materials are publicly readable to allow potential customers to browse offerings. However, only the owning supplier can create, update, or delete them.
+ * - Mirrored Orders for Security: An order created by a user under `/users/{userId}/orders` is expected to be mirrored (e.g., by a Cloud Function) under `/suppliers/{supplierId}/orders`. This ruleset secures each path independently, allowing a user to manage their view of the order and a supplier to manage theirs (e.g., updating the status) without granting cross-path permissions. Client-side creation of supplier-side orders is disabled.
+ *
+ * Denormalization for Authorization:
+ * The ruleset relies on denormalized ID fields within documents (`userId`, `supplierId`, etc.) to validate ownership and relational integrity directly. For example, when a user creates an order, the rules verify that the `userId` field in the new document matches the `userId` in the path. This avoids slow and costly `get()` calls to other documents for authorization checks.
+ *
+ * Structural Segregation:
+ * The use of separate top-level collections for `/users` and `/suppliers`, and the nesting of user-specific data like `/orders` within these collections, provides a strong, secure, and performant structure. This segregation simplifies rules and makes list queries inherently secure.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions for improved readability and reusability.
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isExistingDoc() {
+      return resource != null;
+    }
+
+    /**
+     * Combines ownership check with document existence check for state-changing operations.
+     * Ensures that update and delete requests target existing documents.
+     */
+    function isExistingOwner(userId) {
+      return isOwner(userId) && isExistingDoc();
+    }
+    
+    /**
+     * Validates that the user's ID is correctly set on document creation.
+     */
+    function hasValidUserFieldsOnCreate(userId) {
+      return request.resource.data.id == userId;
+    }
+
+    /**
+     * Ensures the user's ID is immutable after creation.
+     */
+    function userFieldsAreImmutable() {
+      return request.resource.data.id == resource.data.id;
+    }
+    
+    /**
+     * Validates that the supplier's ID is correctly set on document creation.
+     */
+    function hasValidSupplierFieldsOnCreate(supplierId) {
+      return request.resource.data.id == supplierId;
+    }
+    
+    /**
+     * Ensures the supplier's ID is immutable after creation.
+     */
+    function supplierFieldsAreImmutable() {
+      return request.resource.data.id == resource.data.id;
+    }
+    
+    /**
+     * Validates that the material's supplierId links correctly to the path.
+     */
+    function hasValidMaterialFieldsOnCreate(supplierId) {
+      return request.resource.data.supplierId == supplierId;
+    }
+
+    /**
+     * Ensures the material's supplierId is immutable.
+     */
+    function materialFieldsAreImmutable() {
+      return request.resource.data.supplierId == resource.data.supplierId;
+    }
+    
+    /**
+     * Validates that the order's userId links correctly to the user path.
+     */
+    function hasValidUserOrderFieldsOnCreate(userId) {
+      return request.resource.data.userId == userId;
+    }
+
+    /**
+     * Ensures critical relational IDs on a user's order are immutable.
+     */
+    function userOrderFieldsAreImmutable() {
+      return request.resource.data.userId == resource.data.userId
+          && request.resource.data.supplierId == resource.data.supplierId;
+    }
+
+    /**
+     * Ensures critical relational IDs on a supplier's order are immutable.
+     */
+    function supplierOrderFieldsAreImmutable() {
+      return request.resource.data.userId == resource.data.userId
+          && request.resource.data.supplierId == resource.data.supplierId;
+    }
+
+    /**
+     * Validates that the order item's orderId links correctly to the path.
+     */
+    function hasValidOrderItemFieldsOnCreate(orderId) {
+      return request.resource.data.orderId == orderId;
+    }
+    
+    /**
+     * Ensures critical relational IDs on an order item are immutable.
+     */
+    function orderItemFieldsAreImmutable() {
+      return request.resource.data.orderId == resource.data.orderId
+          && request.resource.data.materialId == resource.data.materialId;
+    }
+
+
+    /**
+     * @description Controls access to a user's profile document.
+     * @path /users/{userId}
+     * @allow (create) An authenticated user can create their own user profile document (e.g., on signup). auth.uid must match {userId}.
+     * @deny (get) An authenticated user 'abc' cannot read the user profile for user 'xyz'.
+     * @principle Restricts access to a user's own data tree (Self-Creation).
+     */
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow list: if false; // Disallow listing all users for privacy.
+      allow create: if isOwner(userId) && hasValidUserFieldsOnCreate(userId);
+      allow update: if isExistingOwner(userId) && userFieldsAreImmutable();
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Controls access to a supplier's profile document.
+     * @path /suppliers/{supplierId}
+     * @allow (create) An authenticated user can create their own supplier profile. auth.uid must match {supplierId}.
+     * @deny (get) An authenticated user 'abc' cannot read the supplier profile for supplier 'xyz'.
+     * @principle Restricts access to a supplier's own data tree (Self-Creation).
+     */
+    match /suppliers/{supplierId} {
+      allow get: if isOwner(supplierId);
+      allow list: if false; // Disallow listing all suppliers for privacy.
+      allow create: if isOwner(supplierId) && hasValidSupplierFieldsOnCreate(supplierId);
+      allow update: if isExistingOwner(supplierId) && supplierFieldsAreImmutable();
+      allow delete: if isExistingOwner(supplierId);
+    }
+    
+    /**
+     * @description Controls access to materials, which are nested under their supplier.
+     * @path /suppliers/{supplierId}/materials/{materialId}
+     * @allow (get, list) Any user, including unauthenticated ones, can read and list materials to browse the catalog.
+     * @deny (create) A user whose UID does not match {supplierId} cannot create a material under that supplier's path.
+     * @principle Public read access for browsing with owner-only writes.
+     */
+    match /suppliers/{supplierId}/materials/{materialId} {
+      allow get: if true;
+      allow list: if true;
+      allow create: if isOwner(supplierId) && hasValidMaterialFieldsOnCreate(supplierId);
+      allow update: if isExistingOwner(supplierId) && materialFieldsAreImmutable();
+      allow delete: if isExistingOwner(supplierId);
+    }
+
+    /**
+     * @description Controls access to a user's view of their orders.
+     * @path /users/{userId}/orders/{orderId}
+     * @allow (create, get, list) An authenticated user can create, read, and list their own orders.
+     * @deny (update) User 'abc' cannot update an order belonging to user 'xyz'.
+     * @principle Restricts access to a user's own data tree.
+     */
+    match /users/{userId}/orders/{orderId} {
+      allow get: if isOwner(userId);
+      allow list: if isOwner(userId);
+      allow create: if isOwner(userId) && hasValidUserOrderFieldsOnCreate(userId);
+      allow update: if isExistingOwner(userId) && userOrderFieldsAreImmutable();
+      allow delete: if isExistingOwner(userId);
+    }
+    
+    /**
+     * @description Controls access to a supplier's view of incoming orders.
+     * @path /suppliers/{supplierId}/orders/{orderId}
+     * @allow (get, list, update) A supplier can read, list, and update their orders (e.g., to change the status).
+     * @deny (create) Users and suppliers cannot create orders directly on the supplier's path; this is handled by backend logic.
+     * @principle Restricts access to a supplier's own data tree.
+     */
+    match /suppliers/{supplierId}/orders/{orderId} {
+      allow get: if isOwner(supplierId);
+      allow list: if isOwner(supplierId);
+      allow create: if false; // Order creation is initiated by the user under /users/{userId}/orders.
+      allow update: if isExistingOwner(supplierId) && supplierOrderFieldsAreImmutable();
+      allow delete: if false; // Deleting orders should be a controlled business process.
+    }
+
+    /**
+     * @description Controls access to items within a user's order.
+     * @path /users/{userId}/orders/{orderId}/orderItems/{orderItemId}
+     * @allow (create, get, list) The user who owns the parent order can manage its items.
+     * @deny (get) User 'abc' cannot read order items from an order belonging to user 'xyz'.
+     * @principle Inherits ownership from the parent document's path.
+     */
+    match /users/{userId}/orders/{orderId}/orderItems/{orderItemId} {
+      allow get: if isOwner(userId);
+      allow list: if isOwner(userId);
+      allow create: if isOwner(userId) && hasValidOrderItemFieldsOnCreate(orderId);
+      allow update: if isExistingOwner(userId) && orderItemFieldsAreImmutable();
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Controls access to items within a supplier's order view.
+     * @path /suppliers/{supplierId}/orders/{orderId}/orderItems/{orderItemId}
+     * @allow (get, list) A supplier can read and list the items within one of their orders.
+     * @deny (create, update, delete) A supplier cannot modify the items of an existing order.
+     * @principle Inherits ownership from the parent document's path, with read-only access to sub-items.
+     */
+    match /suppliers/{supplierId}/orders/{orderId}/orderItems/{orderItemId} {
+      allow get: if isOwner(supplierId);
+      allow list: if isOwner(supplierId);
+      allow create: if false;
+      allow update: if false;
+      allow delete: if false;
+    }
+  }
+}
