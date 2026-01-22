@@ -57,6 +57,12 @@ export async function getRecommendations(
     }
   } catch (error) {
     console.error(error);
+    if (error instanceof Error && error.message.includes('AI failed to generate')) {
+      return {
+        message: 'The AI was unable to generate recommendations for your request. Please try rephrasing your needs.',
+        success: false,
+      };
+    }
     return {
       message: 'An unexpected error occurred. Please try again later.',
       success: false,

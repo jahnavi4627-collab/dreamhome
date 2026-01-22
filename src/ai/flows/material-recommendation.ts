@@ -40,14 +40,22 @@ const materialRecommendationPrompt = ai.definePrompt({
   model: 'googleai/gemini-1.5-flash-latest',
   input: {schema: MaterialRecommendationInputSchema},
   output: {schema: MaterialRecommendationOutputSchema},
-  prompt: `You are an expert construction material advisor. Based on the project requirements below, recommend a list of materials that are suitable for the project.
+  prompt: `You are an expert construction material advisor. Your task is to recommend construction materials based on the provided project details.
 
-Project Type: {{{projectType}}}
-Budget: {{{budget}}} INR
-Location: {{{location}}}
-Specific Needs: {{{specificNeeds}}}
+Your response MUST be a valid JSON object that conforms to the provided output schema. The JSON object should have a single key "recommendations", which is an array of material objects.
 
-Provide a list of materials with their name, description, and approximate cost. Focus on materials that fit within the specified budget and are available in the given location.`,
+Each material object in the "recommendations" array must have the following properties:
+- "materialName": The name of the recommended material.
+- "description": A description of the material and its suitability for the project.
+- "approximateCost": The approximate cost of the material in INR.
+
+Project Details:
+- Project Type: {{{projectType}}}
+- Budget: {{{budget}}} INR
+- Location: {{{location}}}
+- Specific Needs: {{{specificNeeds}}}
+
+Based on these details, generate the recommendations. Focus on materials that fit within the budget and are available in the location.`,
 });
 
 // Define the Genkit flow
@@ -59,7 +67,10 @@ const materialRecommendationFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await materialRecommendationPrompt(input);
-    return output!;
+    if (!output) {
+      throw new Error('AI failed to generate a valid recommendation response.');
+    }
+    return output;
   }
 );
 
