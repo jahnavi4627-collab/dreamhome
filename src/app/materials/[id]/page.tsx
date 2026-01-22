@@ -7,11 +7,12 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
-import { notFound } from 'next/navigation';
+import { notFound, useParams } from 'next/navigation';
 import { ShoppingCart } from 'lucide-react';
 import { useCart } from '@/context/cart-context';
 
-export default function MaterialDetailPage({ params }: { params: { id: string } }) {
+export default function MaterialDetailPage() {
+  const params = useParams<{ id: string }>();
   const { addToCart } = useCart();
   const material = materials.find((m) => m.id === params.id);
 
